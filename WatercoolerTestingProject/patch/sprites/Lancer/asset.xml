@@ -1,0 +1,11 @@
+﻿<assets>
+	<sprite>
+		<name>spr_lancer</name>
+		<size width='512' height='512' />
+		<origin mode='default' />
+		<margin mode='default' />
+		<frames>
+			<image>lancer.png</image>
+		</frames>
+	</sprite>
+</assets>

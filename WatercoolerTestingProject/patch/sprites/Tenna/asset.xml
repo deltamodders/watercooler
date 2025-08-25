@@ -1,0 +1,11 @@
+<assets>
+	<sprite>
+		<name>spr_tenna</name>
+		<size width='128' height='128' />
+		<origin mode='default' /> <!-- since the image is 128x128, it's the same as <origin mode='center' /> -->
+		<margin mode='default' /> <!-- same as <margin mode='manual' left='0' right='0' top='0' bottom='0'> /> -->
+		<frames> <!-- same as <frames speed=1 /> -->
+			<image>tenna.png</image>
+		</frames>
+	</sprite>
+</assets>

@@ -1,0 +1,18 @@
+﻿<assets>
+	<object>
+		<name>obj_watercooler</name>
+		<sprite>spr_tenna</sprite>
+		<visible>yes</visible>
+		<solid>no</solid>
+		<persistent>no</persistent>
+		<parent>obj_tester</parent>
+		<textureMask>spr_tenna</textureMask>
+		<collision>box</collision>
+
+		<events>
+			<event type="Create" code="create.gml" />
+			<event type="Step" code="step.gml" />
+			<event type="DrawGUI" code="drawgui.gml" />
+		</events>
+	</object>
+</assets>

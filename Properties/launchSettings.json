@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Watercooler": {
+      "commandName": "Project",
+      "commandLineArgs": "compile --input \"$(SolutionDir)WatercoolerTestingProject\\chapter3_windows\\data.bak.win\" --output \"$(SolutionDir)WatercoolerTestingProject\\chapter3_windows\\data.win\" --project \"$(SolutionDir)WatercoolerTestingProject\\patch\""
+    }
+  }
+}

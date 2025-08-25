@@ -1,0 +1,42 @@
+﻿<assets>
+	<room orderAfter="Room1"> <!-- you can also specify the exact order number (not recommended) using order="<0-based index>" or use orderBefore="<room name>" -->
+		<name>room_watercooler</name>
+		<size width="640" height="480" />
+		<persistent>no</persistent>
+		<!-- <creationCode>creationCode1.gml</creationCode> -->
+		<views>
+			<view enabled="no" /> <!-- disabled viewports dont need any properties. -->
+			<view enabled="yes">
+				<physical x="0" y="0" width="640" height="480" />
+				<viewport x="0" y="0" width="640" height="480" />
+				<border horizontal="32" vertical="32" />
+				<scrollSpeed x="-1" y="-1" />
+				<!-- <followsObject>obj_tester</followsObject> -->
+			</view>
+		</views>
+		<layers>
+			<layer type="instances" name="Compatibility_Instances" depth="10000" visible="yes">
+				<instance of="obj_watercooler">
+					<position x="100" y="50" />
+					<!-- <creationCode>creationCode1.gml</creationCode> -->
+					<!-- <preCreationCode>preCreationCode1.gml</preCreationCode> -->
+					<scale x="1" y="1" />
+					<color>#FFFFFFFF</color>
+					<rotation>0</rotation>
+					<imageIndex>0</imageIndex>
+					<imageSpeed>1</imageSpeed>
+				</instance>
+			</layer>
+			<layer type="background" name="Compatibility_Background" depth="20000" visible="yes">
+				<offset x="0" y="0" />
+				<scrollSpeed x="12" y="12" />
+				<foreground>no</foreground> <!-- no clue what this does -->
+				<sprite>spr_tenna</sprite>
+				<tiling horizontal="yes" vertical="yes" />
+				<stretch>no</stretch>
+				<color>#FF4C4C4C</color>
+				<imageSpeed>15</imageSpeed>
+			</layer>
+		</layers>
+	</room>
+</assets>

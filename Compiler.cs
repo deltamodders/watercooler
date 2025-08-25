@@ -26,7 +26,6 @@ namespace Watercooler
             string outExt = Path.GetExtension(outPath);
 
             if (!File.Exists(_gamePath)) throw new Exception($"Invalid game path: {_gamePath}");
-            if (!Directory.Exists(_rootPath)) throw new Exception($"Invalid Watercooler project path: {_rootPath}");
             if (!string.Equals(".win", outExt, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(".ios", outExt, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(".unx", outExt, StringComparison.OrdinalIgnoreCase) &&
@@ -47,6 +46,8 @@ namespace Watercooler
             foreach (string project in rootPath)
             {
                 _rootPath = project;
+                if (!Directory.Exists(_rootPath)) throw new Exception($"Invalid Watercooler project path: {_rootPath}");
+
                 Console.WriteLine($"----------------------------- STARTING READ OF PROJECT '{project}'");
                 LoadSpritePatches();
                 LoadObjectPatches();

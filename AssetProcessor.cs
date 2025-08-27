@@ -206,9 +206,49 @@ namespace Watercooler
                                 case "sprite" when entryAsset is Object obj:
                                     {
                                         UndertaleSprite? foundSprite = _gameData.Sprites.ByName(node.InnerText.Trim(), true);
-                                        if (foundSprite != null)
-                                            obj.Sprite = foundSprite;
+                                        if (foundSprite != null) obj.Sprite = foundSprite;
                                         else Console.WriteLine($"-- WARN: Sprite '{node.InnerText.Trim()}' was not found for asset #{i} in '{rel}'.");
+                                        break;
+                                    }
+
+                                case "visible" when entryAsset is Object obj:
+                                    {
+                                        obj.Visible = StringToBool(node.InnerText, true);
+                                        break;
+                                    }
+
+                                case "solid" when entryAsset is Object obj:
+                                    {
+                                        obj.Solid = StringToBool(node.InnerText, true);
+                                        break;
+                                    }
+
+                                case "persistent" when entryAsset is Object obj:
+                                    {
+                                        obj.Persistent = StringToBool(node.InnerText, true);
+                                        break;
+                                    }
+
+                                case "parent" when entryAsset is Object obj:
+                                    {
+                                        UndertaleGameObject? possibleParent = _gameData.GameObjects.ByName(node.InnerText, true);
+                                        if (possibleParent != null) obj.Parent = possibleParent;
+                                        else Console.WriteLine($"-- WARN: Parent object '{node.InnerText.Trim()}' was not found for asset #{i} in '{rel}'.");
+                                        break;
+                                    }
+
+                                case "texturemask" when entryAsset is Object obj:
+                                    {
+                                        UndertaleSprite? foundSprite = _gameData.Sprites.ByName(node.InnerText.Trim(), true);
+                                        if (foundSprite != null) obj.TextureMask = foundSprite;
+                                        else Console.WriteLine($"-- WARN: Texture mask sprite '{node.InnerText.Trim()}' was not found for asset #{i} in '{rel}'.");
+                                        break;
+                                    }
+
+                                case "collision" when entryAsset is Object obj:
+                                    {
+                                        if (foundSprite != null) obj.TextureMask = foundSprite;
+                                        else Console.WriteLine($"-- WARN: Texture mask sprite '{node.InnerText.Trim()}' was not found for asset #{i} in '{rel}'.");
                                         break;
                                     }
 

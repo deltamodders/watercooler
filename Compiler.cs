@@ -9,6 +9,7 @@ using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using xdelta3.net;
 
 namespace Watercooler
 {
@@ -24,18 +25,23 @@ namespace Watercooler
             _outPath = outPath;
 
             string outExt = Path.GetExtension(outPath);
+            bool isXdelta = string.Equals(".xdelta", outExt, StringComparison.OrdinalIgnoreCase);
 
             if (!File.Exists(_gamePath)) throw new Exception($"Invalid game path: {_gamePath}");
             if (!string.Equals(".win", outExt, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(".ios", outExt, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(".unx", outExt, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(".droid", outExt, StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(".xdelta", outExt, StringComparison.OrdinalIgnoreCase))
+                !isXdelta)
                 Console.WriteLine($"WARN: Unsupported output file extension. Watercooler will save the output using the GameMaker data file format.");
 
             Console.WriteLine("Reading game data...");
             FileStream fs = File.OpenRead(_gamePath);
             _gameData = UndertaleIO.Read(fs);
+
+            MemoryStream? fuckass = isXdelta ? new() : null;
+            fs.Seek(0, SeekOrigin.Begin);
+            if (fuckass != null) fs.CopyTo(fuckass);
 
             fs.Close();
             Console.WriteLine($"Read successful!");
@@ -55,9 +61,22 @@ namespace Watercooler
                 Console.WriteLine($"----------------------------- PROJECT APPLIED SUCCESSFULLY");
             }
 
-            FileStream fstemp = File.OpenWrite(_outPath);
-            UndertaleIO.Write(fstemp, _gameData);
-            fstemp.Close();
+            if (isXdelta && fuckass != null)
+            {
+                MemoryStream ms = new();
+                UndertaleIO.Write(ms, _gameData);
+
+                Console.WriteLine($"MS LENGTH: {ms.Length}, FUCKASS LENGTH: {fuckass.Length}");
+
+                byte[] patchBytes = Xdelta3Lib.Encode(fuckass.ToArray(), ms.ToArray()).ToArray();
+                File.WriteAllBytes(_outPath, patchBytes);
+            }
+            else
+            {
+                FileStream fstemp = File.OpenWrite(_outPath);
+                UndertaleIO.Write(fstemp, _gameData);
+                fstemp.Close();
+            }
 
             Console.WriteLine("\nPatches applied.");
             _gameData.Dispose();

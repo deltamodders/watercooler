@@ -44,7 +44,7 @@ namespace Watercooler
             if (fuckass != null) fs.CopyTo(fuckass);
 
             fs.Close();
-            Console.WriteLine($"Read successful!");
+            Console.WriteLine("Read successful!");
             Console.WriteLine("-----------------------------------------------");
 
             Console.WriteLine("Reading patch data...");
@@ -58,7 +58,7 @@ namespace Watercooler
                 LoadSpritePatches();
                 LoadObjectPatches();
                 LoadCodePatches();
-                Console.WriteLine($"----------------------------- PROJECT APPLIED SUCCESSFULLY");
+                Console.WriteLine("----------------------------- PROJECT APPLIED SUCCESSFULLY");
             }
 
             if (isXdelta && fuckass != null)
@@ -66,7 +66,7 @@ namespace Watercooler
                 MemoryStream ms = new();
                 UndertaleIO.Write(ms, _gameData);
 
-                Console.WriteLine($"MS LENGTH: {ms.Length}, FUCKASS LENGTH: {fuckass.Length}");
+                //Console.WriteLine($"MS LENGTH: {ms.Length}, FUCKASS LENGTH: {fuckass.Length}");
 
                 byte[] patchBytes = Xdelta3Lib.Encode(fuckass.ToArray(), ms.ToArray()).ToArray();
                 File.WriteAllBytes(_outPath, patchBytes);

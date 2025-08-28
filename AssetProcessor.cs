@@ -247,8 +247,6 @@ namespace Watercooler
 
                                 case "collision" when entryAsset is Object obj:
                                     {
-                                        if (foundSprite != null) obj.TextureMask = foundSprite;
-                                        else Console.WriteLine($"-- WARN: Texture mask sprite '{node.InnerText.Trim()}' was not found for asset #{i} in '{rel}'.");
                                         break;
                                     }
 

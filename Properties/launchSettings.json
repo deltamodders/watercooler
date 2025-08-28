@@ -2,7 +2,7 @@
   "profiles": {
     "Watercooler": {
       "commandName": "Project",
-      "commandLineArgs": "compile --input \"$(SolutionDir)WatercoolerTestingProject\\chapter3_windows\\data.bak.win\" --output \"$(SolutionDir)WatercoolerTestingProject\\chapter3_windows\\data.win\" --project \"$(SolutionDir)WatercoolerTestingProject\\patch\""
+      "commandLineArgs": "decompile -i \"$(SolutionDir)WatercoolerTestingProject\\chapter3_windows\\data.bak.win\" -o \"$(SolutionDir)WatercoolerTestingProject\\decompiled\" -x \"$(SolutionDir)WatercoolerTestingProject\\chapter3_windows\"\\patch.xdelta\""
     }
   }
 }

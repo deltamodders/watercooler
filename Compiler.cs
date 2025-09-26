@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Numerics;
@@ -248,7 +249,36 @@ namespace Watercooler
                 return;
             }
 
+            GlobalDecompileContext gdc = new(_gameData);
+            IDecompileSettings ds = _gameData.ToolInfo.DecompilerSettings;
+            CodeImportGroup importGroup = new(_gameData, gdc, ds);
+            // I fucking       LOVE AUTOCREATEASSETS!!!!
+            importGroup.AutoCreateAssets = true;
 
+            foreach (Classes.Object obj in finishedObjects)
+            {
+                Console.WriteLine($"Importing object asset {obj.Name}");
+                UndertaleGameObject importedObject = new();
+
+                importedObject.Name = _gameData.Strings.MakeString(obj.Name);
+                importedObject.Persistent = obj.Persistent;
+                importedObject.Solid = obj.Solid;
+                importedObject.ParentId = obj.Parent;
+                importedObject.Sprite = obj.Sprite;
+                importedObject.Visible = obj.Visible;
+                importedObject.CollisionShape = obj.Collision;
+                importedObject.TextureMaskId = obj.TextureMask;
+
+                _gameData.GameObjects.Add(importedObject);
+
+                // !! This can fully override existing object code -- hopefully that is not an issue...
+                foreach (Classes.Object.EventAction action in obj.eventActions)
+                    importGroup.QueueReplace(action.ImportName, File.ReadAllText(action.CodePath));
+            }
+
+            Console.WriteLine("\nObject asset importing completed, now importing object code...");
+            importGroup.Import();
+            Console.WriteLine("Object code imported.");
         }
 
         public void LoadCodePatches()

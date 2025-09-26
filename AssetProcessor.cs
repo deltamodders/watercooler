@@ -73,7 +73,7 @@ namespace Watercooler
 
                         foreach (XmlNode node in root.ChildNodes)
                         {
-                            //Console.WriteLine($"DEBUG Node: {node.Name}");
+                            //Console.WriteLine($"DEBUG Node: {node.Name}"); 
                             switch (node.Name.ToLower())
                             {
                                 case "name":
@@ -247,6 +247,43 @@ namespace Watercooler
 
                                 case "collision" when entryAsset is Object obj:
                                     {
+                                        break;
+                                    }
+
+                                // Object events
+                                case "events" when entryAsset is Object obj:
+                                    {
+                                        XmlNodeList children = node.ChildNodes;
+                                        foreach (XmlNode child in children)
+                                        {
+                                            switch (child.Name.ToLower())
+                                            {
+                                                case "event":
+                                                    XmlAttributeCollection? attrs = child.Attributes;
+
+                                                    XmlNode? type = attrs?.GetNamedItem("type");
+                                                    XmlNode? code = attrs?.GetNamedItem("code");
+                                                    if (attrs == null || code == null || type == null )
+                                                    {
+                                                        Console.WriteLine($"-- WARN: Node '{child.Name}' in object events for asset #{i} in '{rel}' does not have required attributes (type, code)");
+                                                        break;
+                                                    }
+
+                                                    string codePath = Path.Combine([_rootPath, asset, code.InnerText.Trim()]);
+                                                    if (!File.Exists(codePath))
+                                                    {
+                                                        Console.WriteLine($"-- WARN: Code file not found at {code.InnerText.Trim()} for object event '{type}' for asset #{i} in '{rel}'");
+                                                        break;
+                                                    }
+
+                                                    obj.eventActions.Add(new Object.EventAction(type.InnerText.Trim(), codePath, obj.Name));
+                                                    break;
+
+                                                default:
+                                                    Console.WriteLine($"-- WARN: Unrecognized node '{child.Name.ToLower()}' in object events for asset #{i} in '{rel}'");
+                                                    break;
+                                            }
+                                        }
                                         break;
                                     }
 

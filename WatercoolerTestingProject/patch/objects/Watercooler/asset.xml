@@ -13,6 +13,7 @@
 			<event type="Create" code="create.gml" />
 			<event type="Step" code="step.gml" />
 			<event type="DrawGUI" code="drawgui.gml" />
+			<event type="Draw" code="draw.gml" />
 		</events>
 	</object>
 </assets>

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Numerics;
@@ -17,6 +18,7 @@ namespace Watercooler
     {
         readonly string _rootPath, _gamePath, _outPath;
         readonly UndertaleData _gameData;
+        CodeImportGroup _importGroup;
 
         public Compiler(string[] rootPath, string gamePath, string outPath)
         {
@@ -49,6 +51,11 @@ namespace Watercooler
 
             Console.WriteLine("Reading patch data...");
 
+            // Import group should be shared for all projects
+            GlobalDecompileContext gdc = new(_gameData);
+            IDecompileSettings ds = _gameData.ToolInfo.DecompilerSettings;
+            _importGroup = new(_gameData, gdc, ds);
+
             foreach (string project in rootPath)
             {
                 _rootPath = project;
@@ -60,6 +67,12 @@ namespace Watercooler
                 LoadCodePatches();
                 Console.WriteLine("----------------------------- PROJECT APPLIED SUCCESSFULLY");
             }
+
+            // NOTE: this might take a very long time while loading multiple big projects.
+            // Might want to look into adding some king of, progress bar
+            Console.WriteLine("---- IMPORTING ALL PROJECT CODE (may take a bit)");
+            _importGroup.Import();
+            Console.WriteLine("---- CODE IMPORTED");
 
             if (isXdelta && fuckass != null)
             {
@@ -248,7 +261,32 @@ namespace Watercooler
                 return;
             }
 
+            // we need auto create assets for this (i love autocreateassets)
+            bool oldACA = _importGroup.AutoCreateAssets;
+            _importGroup.AutoCreateAssets = true;
 
+            foreach (Classes.Object obj in finishedObjects)
+            {
+                Console.WriteLine($"Importing object asset {obj.Name}");
+                UndertaleGameObject importedObject = new();
+
+                importedObject.Name = _gameData.Strings.MakeString(obj.Name);
+                importedObject.Persistent = obj.Persistent;
+                importedObject.Solid = obj.Solid;
+                importedObject.ParentId = obj.Parent;
+                importedObject.Sprite = obj.Sprite;
+                importedObject.Visible = obj.Visible;
+                importedObject.CollisionShape = obj.Collision;
+                importedObject.TextureMaskId = obj.TextureMask;
+
+                _gameData.GameObjects.Add(importedObject);
+
+                // !! This can fully override existing object code -- hopefully that is not an issue...
+                foreach (Classes.Object.EventAction action in obj.eventActions)
+                    _importGroup.QueueReplace(action.ImportName, File.ReadAllText(action.CodePath));
+            }
+
+            _importGroup.AutoCreateAssets = oldACA;
         }
 
         public void LoadCodePatches()
@@ -258,10 +296,6 @@ namespace Watercooler
                 .GetFiles(Path.Combine(_rootPath, "scripts"), "*.gml", SearchOption.AllDirectories)
                 .Select(x => Path.GetFileName(x))
                 .ToList();
-
-            GlobalDecompileContext gdc = new(_gameData);
-            IDecompileSettings ds = _gameData.ToolInfo.DecompilerSettings;
-            CodeImportGroup importGroup = new(_gameData, gdc, ds);
 
             foreach (string f in fi)
             {
@@ -296,7 +330,7 @@ namespace Watercooler
                             {
                                 if (wcCommand[1].ToUpper() == "ALL")
                                 {
-                                    importGroup.QueueReplace(wcCommand[2], code);
+                                    _importGroup.QueueReplace(wcCommand[2], code);
                                     continueAnalysis = false;
                                     Console.WriteLine($"-- -- Replacing '{wcCommand[2]}' with ALL of '{f}'");
                                 }
@@ -310,7 +344,7 @@ namespace Watercooler
                                 if (wcCommand[1].ToUpper() == "END")
                                 {
                                     isReadingContinuously = false;
-                                    importGroup.QueueReplace(readingScript, string.Join(Environment.NewLine, readLines));
+                                    _importGroup.QueueReplace(readingScript, string.Join(Environment.NewLine, readLines));
                                     Console.WriteLine($"-- -- Replacing '{readingScript}' with a {readLines.Count}-line SECTION of '{f}'");
                                     readLines.Clear();
                                 }
@@ -323,7 +357,7 @@ namespace Watercooler
                                 {
                                     if (_gameData.Scripts.ByName(wcCommand[2], true) != null)
                                     {
-                                        importGroup.QueueReplace(wcCommand[2], code);
+                                        _importGroup.QueueReplace(wcCommand[2], code);
                                         Console.WriteLine($"-- -- Replacing '{wcCommand[2]}' with ALL of '{f}'");
                                         break;
                                     }
@@ -334,7 +368,7 @@ namespace Watercooler
                                     scr.Name = _gameData.Strings.MakeString(wcCommand[2]);
                                     scr.Code = UndertaleCode.CreateEmptyEntry(_gameData, $"gml_GlobalScript_{scr.Name.Content}");
                                     _gameData.GlobalInitScripts.Add(new UndertaleGlobalInit() { Code = scr.Code });
-                                    importGroup.QueueReplace(scr.Code.Name.Content, code);
+                                    _importGroup.QueueReplace(scr.Code.Name.Content, code);
                                 }
 
                                 if (wcCommand[1].ToUpper() == "EVENT")
@@ -348,7 +382,7 @@ namespace Watercooler
                                         (EventType evt, uint subtype) = GetEventTypeFromString(eventName);
 
                                         Console.WriteLine($"-- -- Replacing event handler for '{objName}' from {lines.Count}-line FUNCTION of '{f}'");
-                                        importGroup.QueueReplace(_gameData.GameObjects.ByName(objName).EventHandlerFor(evt, subtype, _gameData), string.Join(Environment.NewLine, lines));
+                                        _importGroup.QueueReplace(_gameData.GameObjects.ByName(objName).EventHandlerFor(evt, subtype, _gameData), string.Join(Environment.NewLine, lines));
                                     }
                                 }
                                 break;
@@ -359,9 +393,7 @@ namespace Watercooler
                 }
             }
 
-            Console.WriteLine("\nAnalysis of script files completed. Starting import...");
-            importGroup.Import();
-            Console.WriteLine("Code patches imported.");
+            Console.WriteLine("\nAnalysis of script files completed.");
         }
 
         public (EventType eventType, uint eventSubtype) GetEventTypeFromString(string eventName)

@@ -1,1 +1,1 @@
-draw_text(24, 12, "obj_watercooler, frame count test: " + String(framecount));
+draw_text(24, 12, "obj_watercooler, frame count test: " + string(framecount));
